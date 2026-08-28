@@ -2955,8 +2955,8 @@ class MeasurementController(
                     else "shared RGB then native tensor")
                 .put("health_sampling", if (integratedOptimizations)
                     "2s low-priority background cache" else "cached")
-                .put("yolo_choice", "640 FP16 GPU COCO5 B9/B3; B9 faster than 3xB3")
-                .put("gpu_model", "COCO5 FP16 B3/B9")
+                .put("yolo_choice", "640 FP16 GPU COCO5 B3; K9 executes as 3xB3 to avoid clean-cache B9 delegate hang")
+                .put("gpu_model", "COCO5 FP16 B1/B3")
                 .put("display_overlay_image_save_in_critical_path", false)
                 .put("physical_exposure_adaptation", true))
         logger.csv("exp55", listOf(
@@ -2993,7 +2993,7 @@ class MeasurementController(
                 raw.captureFast(grid.fastestExposureUs, grid.baseGain, 1)
             else raw.captureExp511Best(grid.fastestExposureUs, grid.baseGain, 1)
             check(raw.lastNativeDecodeMismatchCount == 0)
-            onStatus("RayNeo SoS · warming FP16 GPU B=1/3/9")
+            onStatus("RayNeo SoS · warming FP16 GPU B=1/3")
             optimizedDetector.warmUpAllBatches()
 
             fun submit(exposureUs: Int, nBurst: Int): Future<Packet> =
@@ -3101,7 +3101,7 @@ class MeasurementController(
                 }
                 val formationMs = ms(formationStart)
                 val active = optimizedDetector
-                val detections = active.detectTensorBatchOptimized(tensor.batch)
+                val detections = active.detectTensorBatchOptimizedFlexible(tensor.batch)
                 val scores = DoubleArray(cells.size) { lane ->
                     detections[lane].sumOf {
                         if (it.confidence >= selectConf) it.confidence.toDouble() else 0.0

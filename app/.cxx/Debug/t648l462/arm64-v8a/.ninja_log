@@ -1,6 +1,0 @@
-# ninja log v5
-0	875	1787824120843157743	CMakeFiles/sos_tensor.dir/native_tensor_preprocessor.cpp.o	330217afb649c6a2
-877	928	1787824120898999686	/Users/silver/Desktop/sos_glass_final/app/build/intermediates/cxx/Debug/t648l462/obj/arm64-v8a/libsos_tensor.so	6c9db825cb6b276
-0	7	0	clean	4d167dcfc0e6379d
-2	898	1787824385343858465	CMakeFiles/sos_tensor.dir/native_tensor_preprocessor.cpp.o	330217afb649c6a2
-898	1087	1787824385534085458	/Users/silver/Desktop/sos_glass_final/app/build/intermediates/cxx/Debug/t648l462/obj/arm64-v8a/libsos_tensor.so	6c9db825cb6b276

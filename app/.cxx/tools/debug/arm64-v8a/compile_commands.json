@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/Users/silver/Desktop/sos_glass_final/app/.cxx/Debug/t648l462/arm64-v8a",
-  "command": "/Users/silver/Library/Android/sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/Users/silver/Library/Android/sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/darwin-x86_64/sysroot -Dsos_tensor_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -fno-limit-debug-info  -fPIC -O3 -ffast-math -fno-exceptions -fno-rtti -march=armv8-a+simd -o CMakeFiles/sos_tensor.dir/native_tensor_preprocessor.cpp.o -c /Users/silver/Desktop/sos_glass_final/app/src/main/cpp/native_tensor_preprocessor.cpp",
-  "file": "/Users/silver/Desktop/sos_glass_final/app/src/main/cpp/native_tensor_preprocessor.cpp"
-}
-]

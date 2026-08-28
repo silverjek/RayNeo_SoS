@@ -1,1 +1,0 @@
-/Users/silver/Desktop/sos_glass_final/app/src/main/cpp/CMakeLists.txt

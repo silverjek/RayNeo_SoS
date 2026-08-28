@@ -594,8 +594,7 @@ class MeasurementActivity : AppCompatActivity() {
                         this,
                         batchedAssets = listOf(
                             "yolov8n_640_coco5_fp16.tflite" to 1,
-                            "yolov8n_640_b3_coco5_fp16.tflite" to 3,
-                            "yolov8n_640_b9_coco5_fp16.tflite" to 9
+                            "yolov8n_640_b3_coco5_fp16.tflite" to 3
                         ),
                         numClasses = 5,
                         classIdMap = TfliteYoloDetector.COCO5_CLASS_IDS,
@@ -608,7 +607,7 @@ class MeasurementActivity : AppCompatActivity() {
                 }
                 if (session.cancelled) return@execute
 
-                post("ROTATION PRELOAD · warming GPU B=1/3/9…")
+                post("ROTATION PRELOAD · warming GPU B=1/3…")
                 detector.warmUpAllBatches()
                 if (session.cancelled) return@execute
 
@@ -981,8 +980,7 @@ class MeasurementActivity : AppCompatActivity() {
                         this,
                         batchedAssets = listOf(
                             "yolov8n_640_coco5_fp16.tflite" to 1,
-                            "yolov8n_640_b3_coco5_fp16.tflite" to 3,
-                            "yolov8n_640_b9_coco5_fp16.tflite" to 9
+                            "yolov8n_640_b3_coco5_fp16.tflite" to 3
                         ),
                         numClasses = 5,
                         classIdMap = TfliteYoloDetector.COCO5_CLASS_IDS,

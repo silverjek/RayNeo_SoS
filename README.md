@@ -15,7 +15,8 @@ Camera2 RAW10 4032×3024
 → fused native ARM path
    (first-N 합산 → 2×2 demosaic → digital gain → sRGB OETF
     → 90° 회전 → 640 letterbox/normalization → tensor)
-→ 5-class YOLOv8n FP16, OpenCL GPU fixed batch B=9/B=3
+→ 5-class YOLOv8n FP16, OpenCL GPU fixed batch B=3
+   (K=9은 안전하게 3×B=3으로 실행)
 → allocation-reuse Decode/NMS → Σconfidence argmax
 → selected candidate만 Bitmap/overlay 생성
 → 다음 sensor request, UI, logging, optional cloud offload
@@ -43,7 +44,8 @@ Camera2 RAW10 4032×3024
 - Bayer sum, demosaic, gain, sRGB, rotation, resize를 하나의 native formation 경로로 합친다.
 - 모든 후보의 ARGB/Bitmap을 만들지 않고 tensor로 직접 추론한 뒤 선택 후보만 표시한다.
 - tensor/RAW/LUT/decode/NMS 버퍼를 재사용한다.
-- 모델은 검증된 640 FP16 COCO5 B=1/3/9만 포함한다. 정확도 저하와 CPU fallback이
+- 모델은 검증된 640 FP16 COCO5 B=1/3만 포함한다. clean-cache B=9 delegate가 장시간
+  정체되는 현상을 피하기 위해 K=9은 3×B=3으로 실행한다. 정확도 저하와 CPU fallback이
   확인된 Full-INT8 512/640 및 NNAPI/NPU 경로는 포함하지 않는다.
 
 COCO5 출력 순서는 `cup`, `wine glass`, `banana`, `bus`, `dining table`이며 앱 내부에서
@@ -55,8 +57,8 @@ COCO5 출력 순서는 `cup`, `wine glass`, `banana`, `bus`, `dining table`이�
 
 | Step | 평균 지연 |
 | --- | ---: |
-| K=3 single probing | 약 **0.32 s** |
-| K=9 burst probing | 약 **0.98 s** |
+| K=3 single probing | 약 **0.31 s** |
+| K=9 burst probing (`3×B=3`) | 약 **1.02 s** |
 
 새 최종 APK는 독립 빌드와 정적 구성을 확인했다. glass가 현재 연결되어 있지 않아 설치
 후 camera/GPU smoke test는 아래 순서로 진행해야 한다.
@@ -72,7 +74,7 @@ adb -s <DEVICE_SERIAL> install -r app/build/outputs/apk/debug/app-debug.apk
 - 앱 이름: `RayNeo SoS`
 - 기본 설정: Proposed, P=5, Safe fallback, digital boost 2×, confidence 0.25
 
-최초 Start 시 camera와 FP16 GPU B=1/3/9를 로드·워밍업하므로 첫 실행은 오래 걸릴 수
+최초 Start 시 camera와 FP16 GPU B=1/3을 로드·워밍업하므로 첫 실행은 오래 걸릴 수
 있다. 이후 처리 시간은 steady-state 값으로 수렴한다.
 
 ## 실기 확인 체크리스트
@@ -81,7 +83,7 @@ adb -s <DEVICE_SERIAL> install -r app/build/outputs/apk/debug/app-debug.apk
 2. Proposed/P=5 Start 후 `K=9 burst` 1회와 `K=3 single` 4회가 반복되는지 확인한다.
 3. 화면 방향, 선택 이미지, bounding box 좌표가 일치하는지 확인한다.
 4. `metadata_match=1`이 유지되고 exposure가 선택된 shutter로 바뀌는지 확인한다.
-5. GPU backend가 B=1/3/9 모두 GPU이고 crash/thermal throttling이 없는지 확인한다.
+5. GPU backend가 B=1/3 모두 GPU이고 crash/thermal throttling이 없는지 확인한다.
 6. 앱 전용 files 디렉터리의 run 폴더에서 `manifest.json`, `frames.csv`, `exp55.csv`,
    `candidates.csv`, `candidate_dets.jsonl`, `router.csv`, `img/`를 확인한다.
 

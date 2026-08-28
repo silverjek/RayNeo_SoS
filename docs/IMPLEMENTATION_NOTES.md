@@ -7,7 +7,7 @@
 | `P` 주기 shutter 재탐색 | P=5/9/12 | 원본 SoS 유지 |
 | candidate 선택 | threshold 이상 `Σconfidence` argmax | 원본 SoS 유지 |
 | all-zero fallback | 5종 metric 또는 safe-cell | 기존 앱 기능 유지 |
-| batched detector | YOLOv8n 640 FP16 GPU B=3/B=9 | 원본 원리 유지 |
+| batched detector | YOLOv8n 640 FP16 GPU B=3; K=9은 3×B=3 | 원본 원리 유지 |
 | non-blocking advisory cloud | cross-exposure router + async HTTP | 원본 SoS 유지 |
 | camera 입력 | camera 0, RAW10 4032×3024 | RayNeo 적응 |
 | RAW/result 결합 | `SENSOR_TIMESTAMP` + exposure/ISO 승인 | RayNeo 적응 |
@@ -42,7 +42,9 @@ letterbox 좌표로 변환한다.
 
 ## 모델 결정
 
-- 채택: COCO5 YOLOv8n, 640, FP16, TFLite GPU OpenCL, fixed B=1/3/9.
+- 채택: COCO5 YOLOv8n, 640, FP16, TFLite GPU OpenCL, fixed B=1/3.
+- B=9 asset은 hot 상태에서 약간 빠르지만 새 패키지의 clean cache에서 delegate 생성이
+  장시간 정체되어 제외했다. K=9은 동일 B=3 모델을 세 번 실행한다.
 - 제외: Full INT8 640은 FP16 기준 detection regression이 있었고 GPU도 빨라지지 않았다.
 - 제외: Full INT8 512는 GPU latency는 줄었지만 recall/confidence 안정성이 더 낮았다.
 - 제외: NNAPI 요청 시 대부분의 operator가 XNNPACK CPU로 fallback되어 Qualcomm NPU를
@@ -64,7 +66,7 @@ letterbox 좌표로 변환한다.
 현재 glass가 연결되어 있지 않아 final package에서는 다음이 아직 필요하다.
 
 - 새 application ID의 launcher 노출 및 camera permission
-- OpenCL B=1/3/9 초기화와 warm cache
+- OpenCL B=1/3 warm cache와 K=9의 3×B=3 실행
 - 300-frame Proposed P=5 smoke/soak
 - metadata match, 방향, preview-box 좌표, async log completeness
 - 선택 후보 Bitmap 생성이 steady-state detection throughput에 주는 작은 후처리 영향

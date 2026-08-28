@@ -324,6 +324,38 @@ class TfliteYoloDetector(
     fun detectTensorBatchOptimized(batch: DirectTensorBatch): List<List<Detection>> =
         detectTensorBatchWithDecoder(batch, optimizedDecoder, "EXP2.2")
 
+    /** Production-safe fixed-batch execution. RayNeo's clean-cache B=9 OpenCL delegate can
+     * block indefinitely during construction, so a K=9 tensor is processed as three proven
+     * B=3 launches when no exact B=9 slot is loaded. Input tensors remain contiguous NHWC;
+     * each chunk is copied with a direct-buffer bulk put rather than per-float conversion. */
+    fun detectTensorBatchOptimizedFlexible(batch: DirectTensorBatch): List<List<Detection>> {
+        val count = batch.transforms.size
+        if (slots.any { it.batch == count }) return detectTensorBatchOptimized(batch)
+        val slot = slots.filter { it.batch < count }.maxByOrNull { it.batch }
+            ?: error("No batch slot can process K=$count")
+        require(count % slot.batch == 0) { "K=$count is not divisible by B=${slot.batch}" }
+        val bytesPerLane = imgsz * imgsz * 3 * 4
+        val out = ArrayList<List<Detection>>(count)
+        var totalRun = 0.0; var totalDecode = 0.0
+        var offset = 0
+        while (offset < count) {
+            val src = batch.input.duplicate().order(ByteOrder.nativeOrder())
+            src.position(offset * bytesPerLane)
+            src.limit((offset + slot.batch) * bytesPerLane)
+            slot.input.clear(); slot.input.put(src); slot.input.rewind()
+            out += detectTensorBatchWithDecoder(
+                DirectTensorBatch(slot.input, batch.transforms.subList(offset, offset + slot.batch)),
+                optimizedDecoder, "FINAL_CHUNKED_B${slot.batch}")
+            totalRun += lastRunMs; totalDecode += lastDecodeMs
+            offset += slot.batch
+        }
+        lastPreprocessMs = 0.0
+        lastRunMs = totalRun
+        lastDecodeMs = totalDecode
+        lastSlotBatch = slot.batch
+        return out
+    }
+
     /** EXP2.3 arm 1: retain the 80-class model output but scan only five COCO channels. */
     fun detectTensorBatchOptimizedCoco5(batch: DirectTensorBatch): List<List<Detection>> =
         detectTensorBatchWithDecoder(batch, requireNotNull(coco5Decoder), "EXP2.3")

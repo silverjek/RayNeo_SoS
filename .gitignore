@@ -1,7 +1,12 @@
 # Build output
 .gradle/
 build/
+.cxx/
 captures/
+
+# Local validation measurements and generated release artifacts
+experiment_results/
+dist/
 
 # Kotlin incremental compilation state
 .kotlin/

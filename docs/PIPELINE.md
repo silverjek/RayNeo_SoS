@@ -10,7 +10,7 @@ flowchart LR
     ROUTE -->|no| S[N=1 single / K=3]
     B --> FUSED[Fused native RAW-to-640 tensor]
     S --> FUSED
-    FUSED --> GPU[YOLOv8n COCO5 FP16 GPU batch]
+    FUSED --> GPU[YOLOv8n COCO5 FP16 GPU B3; K9 = 3 launches]
     GPU --> NMS[Reused Decode/NMS buffers]
     NMS --> PICK[sum-confidence argmax / fallback]
     PICK --> SENSOR[Submit next sensor setting]

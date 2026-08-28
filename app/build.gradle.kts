@@ -12,8 +12,8 @@ android {
         applicationId = "com.sos.rayneox3.final"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0-final"
+        versionCode = 2
+        versionName = "1.1-final-safe"
 
         ndk {
             // RayNeo X3 Pro is arm64; excluding emulator ABIs cuts the deployable APK size.
